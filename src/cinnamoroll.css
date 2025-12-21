@@ -1,0 +1,26 @@
+#cinnamoroll-companion {
+  position: fixed;
+  z-index: 999999;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.cinnamoroll-speech {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  padding: 0px 0px;
+  white-space: nowrap;
+}
+
+.cinnamoroll-text {
+  margin: 0;
+  font-family: "Kosugi Maru", "Comic Sans MS", cursive, sans-serif;
+  font-size: 18px;
+  color: #f5b0c5;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff,
+    -1px 1px 0 #fff;
+}

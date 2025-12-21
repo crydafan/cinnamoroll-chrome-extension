@@ -5,14 +5,17 @@ fontFace.load().then((loadedFont) => {
   document.fonts.add(loadedFont);
 });
 
-const cinnamorollGif = chrome.runtime.getURL(
+const cinnamorollAwakeGif = chrome.runtime.getURL(
   "src/assets/hello-kitty-cinnamoroll-2.gif"
+);
+const cinnamorollSleepyGif = chrome.runtime.getURL(
+  "src/assets/hello-kitty-cinnamoroll-3.gif"
 );
 
 const cinnamoroll = document.createElement("div");
 cinnamoroll.id = "cinnamoroll-companion";
 cinnamoroll.innerHTML = `
-  <img src="${cinnamorollGif}" alt="Cinnamoroll" width="250"></img>
+  <img src="${cinnamorollAwakeGif}" alt="Cinnamoroll" width="250"></img>
   <div class="cinnamoroll-speech" style="display: none;">
     <p class="cinnamoroll-text"></p>
   </div>
@@ -25,24 +28,31 @@ let y = Math.random() * (window.innerHeight - 250);
 cinnamoroll.style.left = x + "px";
 cinnamoroll.style.top = y + "px";
 
-/*
-function updateCinnamorollMood() {
-  const cinnamorollSleepyGif = chrome.runtime.getURL(
-    "src/assets/hello-kitty-cinnamoroll-3.gif"
-  );
+// Sleep/wake functionality
+let isSleeping = false;
+let sleepTimeoutId = null;
 
-  cinnamoroll.innerHTML = `
-  <img src="${cinnamorollSleepyGif}" alt="Cinnamoroll" width="250"></img>
-  <div class="cinnamoroll-speech" style="display: none;">
-    <p class="cinnamoroll-text"></p>
-  </div>
-`;
+function goToSleep() {
+  if (isSleeping) return;
+  isSleeping = true;
+  const img = cinnamoroll.querySelector("img");
+  img.src = cinnamorollSleepyGif;
 }
 
-setTimeout(() => {
-  updateCinnamorollMood();
-}, 60000); // Change mood after 1 minute
-*/
+function wakeUp() {
+  if (!isSleeping) return;
+  isSleeping = false;
+  const img = cinnamoroll.querySelector("img");
+  img.src = cinnamorollAwakeGif;
+}
+
+function resetInactivityTimer() {
+  if (sleepTimeoutId) clearTimeout(sleepTimeoutId);
+  sleepTimeoutId = setTimeout(goToSleep, 6000); // 6 seconds of inactivity
+}
+
+// Start the inactivity timer
+resetInactivityTimer();
 
 // Drag functionality
 let isDragging = false;
@@ -57,11 +67,22 @@ cinnamoroll.addEventListener("mousedown", (e) => {
   offsetX = e.clientX - cinnamoroll.offsetLeft;
   offsetY = e.clientY - cinnamoroll.offsetTop;
   cinnamoroll.style.cursor = "grabbing";
+  resetInactivityTimer();
   e.preventDefault();
 });
 
 cinnamoroll.addEventListener("click", (e) => {
   if (hasDragged) return; // Prevent click action if dragging occurred
+
+  // Wake up if sleeping
+  if (isSleeping) {
+    wakeUp();
+    resetInactivityTimer();
+    e.preventDefault();
+    return;
+  }
+
+  resetInactivityTimer();
 
   const speechBubble = cinnamoroll.querySelector(".cinnamoroll-speech");
   const speechText = cinnamoroll.querySelector(".cinnamoroll-text");
